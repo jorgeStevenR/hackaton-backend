@@ -4,7 +4,7 @@ import com.hackathon.tutormatch.domain.exception.CredencialesInvalidasException;
 import com.hackathon.tutormatch.domain.exception.DomainException;
 import com.hackathon.tutormatch.domain.exception.EmailYaRegistradoException;
 import com.hackathon.tutormatch.domain.exception.SesionExpiradaException;
-import com.hackathon.tutormatch.domain.exception.TutorNoEncontradoException;
+import com.hackathon.tutormatch.domain.exception.RecursoNoEncontradoException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -50,9 +50,9 @@ public class GlobalExceptionHandler {
                 "El parametro '" + ex.getName() + "' tiene un valor no valido");
     }
 
-    @ExceptionHandler(TutorNoEncontradoException.class)
-    public ProblemDetail noEncontrado(TutorNoEncontradoException ex) {
-        return problema(HttpStatus.NOT_FOUND, "Tutor no encontrado", ex.getMessage());
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ProblemDetail noEncontrado(RecursoNoEncontradoException ex) {
+        return problema(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage());
     }
 
     @ExceptionHandler({CredencialesInvalidasException.class, SesionExpiradaException.class})

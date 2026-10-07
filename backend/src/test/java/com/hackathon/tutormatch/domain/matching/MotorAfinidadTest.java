@@ -98,6 +98,35 @@ class MotorAfinidadTest {
     }
 
     @Test
+    @DisplayName("Un tutor sin horarios en comun no se recomienda aunque tenga mas score")
+    void disponibleAntesQueScore() {
+        // Sin horario en comun: 0 + 30 + 20 + 10 = 60
+        Tutor expertoSinHorario = tutor(1L, "Ana", "Calculo", List.of("VIE-16"), NivelExperiencia.EXPERTO, 5.0, Modalidad.AMBAS);
+        // Con horario en comun: 40 + 10 + 4 + 0 = 54
+        Tutor basicoDisponible = tutor(2L, "Diego", "Calculo", List.of("LUN-08"), NivelExperiencia.BASICO, 1.0, Modalidad.PRESENCIAL);
+
+        List<ResultadoMatch> ranking = motor.calcularRanking(solicitud("Calculo", "LUN-08"),
+                List.of(expertoSinHorario, basicoDisponible));
+
+        assertThat(ranking.get(0).tutor().getNombre()).isEqualTo("Diego");
+        assertThat(ranking.get(0).recomendado()).isTrue();
+        assertThat(ranking.get(0).disponible()).isTrue();
+        assertThat(ranking.get(1).disponible()).isFalse();
+        assertThat(ranking.get(1).score()).isGreaterThan(ranking.get(0).score());
+    }
+
+    @Test
+    @DisplayName("Si ningun tutor esta disponible, nadie queda recomendado")
+    void ningunoDisponible() {
+        Tutor tutor = tutor(1L, "Ana", "Calculo", List.of("VIE-16"), NivelExperiencia.EXPERTO, 5.0, Modalidad.AMBAS);
+
+        List<ResultadoMatch> ranking = motor.calcularRanking(solicitud("Calculo", "LUN-08"), List.of(tutor));
+
+        assertThat(ranking).hasSize(1);
+        assertThat(ranking.get(0).recomendado()).isFalse();
+    }
+
+    @Test
     @DisplayName("La materia se compara sin mayusculas ni tildes")
     void materiaSinTildes() {
         Tutor tutor = tutor(1L, "Ana", "Calculo", List.of("LUN-08"), NivelExperiencia.EXPERTO, 5.0, Modalidad.AMBAS);

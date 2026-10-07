@@ -47,8 +47,13 @@ HTTP ──►│     web      │────►│  application   │───
 | Calificacion | 0.20 | calificacion / 5 |
 | Modalidad | 0.10 | 1 si es compatible (o el tutor es AMBAS) |
 
-Primero se descartan los tutores que no dominan la materia (sin distinguir mayusculas ni tildes). En
-empate gana el de mayor nivel. Agregar un criterio = una clase nueva que implemente `CriterioAfinidad`.
+Primero se descartan los tutores que no dominan la materia (sin distinguir mayusculas ni tildes).
+El ranking pone primero a los tutores **disponibles** (al menos un horario en comun), luego ordena por
+score y en empate gana el de mayor nivel. Solo se recomienda a un tutor disponible: si ninguno lo esta,
+la solicitud queda sin asignar. Agregar un criterio = una clase nueva que implemente `CriterioAfinidad`.
+
+Cada busqueda en `POST /api/match` **queda registrada** (tabla `solicitudes`) con el tutor asignado, el
+score y la justificacion, y se consulta en `GET /api/solicitudes`.
 
 ## API
 
@@ -57,7 +62,9 @@ empate gana el de mayor nivel. Agregar un criterio = una clase nueva que impleme
 | GET | `/api/tutores` | Lista de tutores |
 | GET | `/api/tutores/{id}` | Un tutor (404 si no existe) |
 | POST | `/api/tutores` | Registra un tutor (201) |
-| POST | `/api/match` | Ranking de tutores para una solicitud |
+| POST | `/api/match` | Ranking de tutores para una solicitud (y la registra) |
+| GET | `/api/solicitudes` | Historial de solicitudes con su asignacion (mas recientes primero) |
+| GET | `/api/solicitudes/{id}` | Una solicitud registrada (404 si no existe) |
 | GET | `/actuator/health` | Health check |
 
 ### Autenticacion (JWT)

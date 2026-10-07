@@ -18,6 +18,11 @@ public record ResultadoMatch(Tutor tutor,
         horariosCoincidentes = Collections.unmodifiableSet(new LinkedHashSet<>(horariosCoincidentes));
     }
 
+    /** Un tutor esta disponible si comparte al menos un horario con el estudiante. */
+    public boolean disponible() {
+        return !horariosCoincidentes.isEmpty();
+    }
+
     public ResultadoMatch comoRecomendado() {
         return new ResultadoMatch(tutor, score, desglose, justificacion, horariosCoincidentes, true);
     }
