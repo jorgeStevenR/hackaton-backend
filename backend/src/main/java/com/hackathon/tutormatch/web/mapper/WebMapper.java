@@ -5,12 +5,14 @@ import com.hackathon.tutormatch.domain.model.NivelExperiencia;
 import com.hackathon.tutormatch.domain.model.ResultadoMatch;
 import com.hackathon.tutormatch.domain.model.Sesion;
 import com.hackathon.tutormatch.domain.model.Solicitud;
+import com.hackathon.tutormatch.domain.model.SolicitudRegistrada;
 import com.hackathon.tutormatch.domain.model.Tutor;
 import com.hackathon.tutormatch.domain.model.Usuario;
 import com.hackathon.tutormatch.web.dto.AuthResponse;
 import com.hackathon.tutormatch.web.dto.DetalleCriterioResponse;
 import com.hackathon.tutormatch.web.dto.MatchResponse;
 import com.hackathon.tutormatch.web.dto.SolicitudRequest;
+import com.hackathon.tutormatch.web.dto.SolicitudResponse;
 import com.hackathon.tutormatch.web.dto.TutorRequest;
 import com.hackathon.tutormatch.web.dto.TutorResponse;
 import com.hackathon.tutormatch.web.dto.UsuarioResponse;
@@ -64,7 +66,25 @@ public class WebMapper {
                 resultado.justificacion(),
                 List.copyOf(resultado.horariosCoincidentes()),
                 resultado.recomendado(),
+                resultado.disponible(),
                 resultado.desglose().stream().map(this::aDetalleResponse).toList());
+    }
+
+    public SolicitudResponse aSolicitudResponse(SolicitudRegistrada registro) {
+        Solicitud s = registro.solicitud();
+        return new SolicitudResponse(
+                registro.id(),
+                s.nombreEstudiante(),
+                s.materia(),
+                List.copyOf(s.horarios()),
+                s.modalidad(),
+                registro.fecha(),
+                registro.asignada(),
+                registro.tutorAsignadoId(),
+                registro.nombreTutorAsignado(),
+                registro.score(),
+                registro.justificacion(),
+                registro.candidatosEvaluados());
     }
 
     public UsuarioResponse aUsuarioResponse(Usuario usuario) {

@@ -17,8 +17,10 @@ import java.util.List;
  */
 public class MotorAfinidad {
 
+    /** Primero los tutores disponibles; luego mayor score; en empate, mayor nivel. */
     private static final Comparator<ResultadoMatch> RANKING = Comparator
-            .comparingDouble(ResultadoMatch::score).reversed()
+            .comparing(ResultadoMatch::disponible).reversed()
+            .thenComparing(Comparator.comparingDouble(ResultadoMatch::score).reversed())
             .thenComparing(Comparator.comparingInt((ResultadoMatch r) -> r.tutor().getNivel().valor()).reversed());
 
     private final List<CriterioAfinidad> criterios;
@@ -30,7 +32,11 @@ public class MotorAfinidad {
         this.criterios = List.copyOf(criterios);
     }
 
-    /** Ranking de mayor a menor score; el primero queda recomendado. Lista vacia si nadie domina la materia. */
+    /**
+     * Ranking de mayor a menor afinidad. Se recomienda al primero solo si esta disponible
+     * (comparte al menos un horario): si nadie lo esta, ninguno queda recomendado.
+     * Lista vacia si nadie domina la materia.
+     */
     public List<ResultadoMatch> calcularRanking(Solicitud solicitud, Collection<Tutor> tutores) {
         List<ResultadoMatch> ranking = new ArrayList<>();
         for (Tutor tutor : tutores) {
@@ -38,7 +44,7 @@ public class MotorAfinidad {
                     .ifPresent(materia -> ranking.add(evaluar(tutor, materia, solicitud)));
         }
         ranking.sort(RANKING);
-        if (!ranking.isEmpty()) {
+        if (!ranking.isEmpty() && ranking.get(0).disponible()) {
             ranking.set(0, ranking.get(0).comoRecomendado());
         }
         return List.copyOf(ranking);

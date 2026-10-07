@@ -27,8 +27,9 @@ public class MatchController {
 
     @PostMapping
     @Operation(summary = "Calcula el ranking de tutores para una solicitud",
-            description = "Ordenado de mayor a menor score; el primero tiene recomendado = true. "
-                    + "Lista vacia si ningun tutor domina la materia.")
+            description = "Primero los tutores disponibles (con algun horario en comun), luego por score. "
+                    + "El primero queda recomendado solo si esta disponible. Lista vacia si ningun tutor domina "
+                    + "la materia. Cada busqueda queda registrada en GET /api/solicitudes.")
     @ApiResponse(responseCode = "200", description = "Ranking de tutores (puede estar vacio)")
     @ApiResponse(responseCode = "400", description = "Campos invalidos")
     @ApiResponse(responseCode = "422", description = "Viola una regla de negocio (ej. horario con formato invalido)")
