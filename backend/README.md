@@ -60,6 +60,19 @@ empate gana el de mayor nivel. Agregar un criterio = una clase nueva que impleme
 | POST | `/api/match` | Ranking de tutores para una solicitud |
 | GET | `/actuator/health` | Health check |
 
+### Autenticacion (JWT)
+
+| Metodo | Ruta | Body / Header | Respuesta |
+|--------|------|---------------|-----------|
+| POST | `/api/auth/register` | `{ name, email, password }` | 201 `{ user, token }` |
+| POST | `/api/auth/login` | `{ email, password, rememberMe? }` | 200 `{ user, token }` |
+| GET | `/api/auth/me` | `Authorization: Bearer <token>` | 200 `{ user }` |
+| POST | `/api/auth/logout` | - | 204 (el frontend borra el token) |
+
+`user = { id (string), name, email }`. Contrasenas cifradas con BCrypt; nunca se devuelven. Email en minusculas y unico.
+Token de 1 dia, o 30 dias con `rememberMe: true`. Todos los errores traen `{ "message": "..." }`:
+401 credenciales invalidas o sesion expirada, 409 email repetido, 400/422 datos invalidos.
+
 Horarios con formato `DIA-HORA`: dias `LUN..VIE`, horas `08`, `10`, `14`, `16`.
 
 ```bash
@@ -107,7 +120,9 @@ docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=supabase --env-file .env tutor
 2. En Render: **New > Web Service** y conecta el repo.
 3. **Root Directory:** `backend` · **Language:** `Docker`.
 4. **Environment Variables:**
-   - `FRONTEND_URL` = URL del frontend, ej. `https://tutormatch-front.onrender.com`
+   - `JWT_SECRET` = texto aleatorio de 32+ caracteres (firma los tokens; **obligatorio en produccion**)
+   - `FRONTEND_URL` = (opcional) otras URLs del frontend separadas por comas.
+     `http://localhost:5173` y `https://hackaton-beta-seis.vercel.app` ya estan permitidas.
    - (Opcional, para Supabase) `SPRING_PROFILES_ACTIVE` = `supabase` y `DB_PASSWORD` = contrasena
 5. **Health Check Path:** `/actuator/health`
 6. **Deploy.** Render inyecta `PORT` y la app lo usa automaticamente.
