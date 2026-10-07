@@ -1,0 +1,15 @@
+# Secretos
+.env
+
+# Java / Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Node (frontend)
+node_modules/
+dist/
