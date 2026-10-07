@@ -3,13 +3,17 @@ package com.hackathon.tutormatch.web.mapper;
 import com.hackathon.tutormatch.domain.model.DetalleCriterio;
 import com.hackathon.tutormatch.domain.model.NivelExperiencia;
 import com.hackathon.tutormatch.domain.model.ResultadoMatch;
+import com.hackathon.tutormatch.domain.model.Sesion;
 import com.hackathon.tutormatch.domain.model.Solicitud;
 import com.hackathon.tutormatch.domain.model.Tutor;
+import com.hackathon.tutormatch.domain.model.Usuario;
+import com.hackathon.tutormatch.web.dto.AuthResponse;
 import com.hackathon.tutormatch.web.dto.DetalleCriterioResponse;
 import com.hackathon.tutormatch.web.dto.MatchResponse;
 import com.hackathon.tutormatch.web.dto.SolicitudRequest;
 import com.hackathon.tutormatch.web.dto.TutorRequest;
 import com.hackathon.tutormatch.web.dto.TutorResponse;
+import com.hackathon.tutormatch.web.dto.UsuarioResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -61,6 +65,14 @@ public class WebMapper {
                 List.copyOf(resultado.horariosCoincidentes()),
                 resultado.recomendado(),
                 resultado.desglose().stream().map(this::aDetalleResponse).toList());
+    }
+
+    public UsuarioResponse aUsuarioResponse(Usuario usuario) {
+        return new UsuarioResponse(String.valueOf(usuario.getId()), usuario.getNombre(), usuario.getEmail());
+    }
+
+    public AuthResponse aAuthResponse(Sesion sesion) {
+        return new AuthResponse(aUsuarioResponse(sesion.usuario()), sesion.token());
     }
 
     private DetalleCriterioResponse aDetalleResponse(DetalleCriterio detalle) {

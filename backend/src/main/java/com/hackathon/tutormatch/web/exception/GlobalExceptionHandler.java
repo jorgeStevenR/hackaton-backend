@@ -1,6 +1,9 @@
 package com.hackathon.tutormatch.web.exception;
 
+import com.hackathon.tutormatch.domain.exception.CredencialesInvalidasException;
 import com.hackathon.tutormatch.domain.exception.DomainException;
+import com.hackathon.tutormatch.domain.exception.EmailYaRegistradoException;
+import com.hackathon.tutormatch.domain.exception.SesionExpiradaException;
 import com.hackathon.tutormatch.domain.exception.TutorNoEncontradoException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,8 +30,10 @@ public class GlobalExceptionHandler {
                 .map(e -> Map.of("campo", e.getField(),
                         "mensaje", e.getDefaultMessage() == null ? "Valor invalido" : e.getDefaultMessage()))
                 .toList();
-        ProblemDetail problema = problema(HttpStatus.BAD_REQUEST, "Datos invalidos",
-                "Uno o mas campos no son validos");
+        // "message" se muestra tal cual en el frontend: se unen los mensajes de cada campo
+        String mensaje = errores.stream().map(e -> e.get("mensaje")).distinct()
+                .reduce((a, b) -> a + ". " + b).orElse("Uno o mas campos no son validos");
+        ProblemDetail problema = problema(HttpStatus.BAD_REQUEST, "Datos invalidos", mensaje);
         problema.setProperty("errores", errores);
         return problema;
     }
@@ -36,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail cuerpoIlegible(HttpMessageNotReadableException ex) {
         return problema(HttpStatus.BAD_REQUEST, "Cuerpo invalido",
-                "El JSON no es valido o tiene valores no permitidos (modalidad: PRESENCIAL, VIRTUAL o AMBAS)");
+                "El cuerpo de la petición no es un JSON válido o tiene valores no permitidos");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -48,6 +53,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TutorNoEncontradoException.class)
     public ProblemDetail noEncontrado(TutorNoEncontradoException ex) {
         return problema(HttpStatus.NOT_FOUND, "Tutor no encontrado", ex.getMessage());
+    }
+
+    @ExceptionHandler({CredencialesInvalidasException.class, SesionExpiradaException.class})
+    public ProblemDetail noAutorizado(DomainException ex) {
+        return problema(HttpStatus.UNAUTHORIZED, "No autorizado", ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailYaRegistradoException.class)
+    public ProblemDetail conflicto(EmailYaRegistradoException ex) {
+        return problema(HttpStatus.CONFLICT, "Conflicto", ex.getMessage());
     }
 
     @ExceptionHandler(DomainException.class)
@@ -76,6 +91,8 @@ public class GlobalExceptionHandler {
     private static ProblemDetail problema(HttpStatus status, String titulo, String detalle) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(status, detalle);
         problema.setTitle(titulo);
+        // Contrato con el frontend: todos los errores traen { "message": "..." }
+        problema.setProperty("message", detalle);
         return problema;
     }
 }
